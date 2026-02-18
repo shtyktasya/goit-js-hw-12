@@ -19,6 +19,7 @@ let per_page = 15;
 loadMoreBtn.addEventListener('click', async () => {
   page += 1;
   showLoader();
+  showLoadMoreButton();
   await fetchImages();
 });
 form.addEventListener('submit', async event => {
@@ -38,7 +39,7 @@ form.addEventListener('submit', async event => {
 
   clearGallery();
   showLoader();
-  hideLoadMoreButton();
+  showLoadMoreButton();
 
   await fetchImages();
 });
@@ -51,9 +52,12 @@ async function fetchImages() {
           'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
       });
+      showLoadMoreButton();
+      hideLoader();
       return;
     }
     createGallery(data.hits);
+    const totalPages = Math.ceil(data.totalHits / per_page);
       if (page > 1) {
           const gallery = document.querySelector('.gallery').firstElementChild;
     
@@ -65,14 +69,17 @@ async function fetchImages() {
               });
           }
       }
-    const totalPages = Math.ceil(data.totalHits / per_page);
+    
     if (page < totalPages) {
       hideLoadMoreButton();
     } else {
       showLoadMoreButton();
-      iziToast.info({
+      if (page !== 1) {
+        iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
-      });
+      }); 
+      }
+     
     }
   } catch (error) {
     iziToast.error({
